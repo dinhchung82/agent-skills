@@ -48,7 +48,7 @@ describe("LeadForm", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const user = userEvent.setup();
-    render(<LeadForm labels={defaultLabels} />);
+    render(<LeadForm labels={defaultLabels} formToken="signed-token" />);
 
     await user.type(screen.getByLabelText(defaultLabels.name), "An Nguyen");
     await user.type(screen.getByLabelText(defaultLabels.email), "an@gmail.com");
@@ -73,8 +73,8 @@ describe("LeadForm", () => {
       investmentRange: "over_1b",
       consent: true,
       company_website: "",
+      formToken: "signed-token",
     });
-    expect(typeof payload.formLoadedAt).toBe("number");
 
     expect(
       await screen.findByText(defaultLabels.successMessage),

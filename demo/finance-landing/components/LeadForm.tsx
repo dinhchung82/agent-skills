@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export interface LeadFormLabels {
   name: string;
@@ -35,10 +35,15 @@ export const defaultLabels: LeadFormLabels = {
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export function LeadForm({ labels = defaultLabels }: { labels?: LeadFormLabels }) {
+export function LeadForm({
+  labels = defaultLabels,
+  formToken = "",
+}: {
+  labels?: LeadFormLabels;
+  formToken?: string;
+}) {
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
-  const formLoadedAt = useRef<number>(Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -53,7 +58,7 @@ export function LeadForm({ labels = defaultLabels }: { labels?: LeadFormLabels }
       investmentRange: String(data.get("investmentRange") ?? ""),
       consent,
       company_website: String(data.get("company_website") ?? ""),
-      formLoadedAt: formLoadedAt.current,
+      formToken,
     };
 
     try {

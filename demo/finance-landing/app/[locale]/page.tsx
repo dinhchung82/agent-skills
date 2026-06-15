@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LeadForm, type LeadFormLabels } from "@/components/LeadForm";
+import { issueFormToken } from "@/lib/formToken";
 
 const OPTION_VALUES = [
   "under_100m",
@@ -53,7 +54,7 @@ export default async function Home({
       <p className="mt-3 text-gray-600">{t("hero.subtitle")}</p>
 
       <section className="mt-8">
-        <LeadForm labels={labels} />
+        <LeadForm labels={labels} formToken={issueFormToken()} />
       </section>
 
       <p className="mt-6 text-xs text-gray-500">{t("hero.disclaimer")}</p>

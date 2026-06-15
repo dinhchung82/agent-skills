@@ -8,6 +8,7 @@ vi.mock("@/lib/sheet", () => ({
 import { POST } from "@/app/api/lead/route";
 import { pushLead } from "@/lib/sheet";
 import { resetRateLimit } from "@/lib/rateLimit";
+import { issueFormToken } from "@/lib/formToken";
 
 function buildReq(payload: Record<string, unknown>, ip = "1.2.3.4") {
   return new Request("http://localhost/api/lead", {
@@ -28,7 +29,7 @@ function validPayload(overrides: Record<string, unknown> = {}) {
     investmentRange: "over_1b",
     consent: true,
     company_website: "", // honeypot để trống
-    formLoadedAt: Date.now() - 3000, // điền đủ lâu
+    formToken: issueFormToken(Date.now() - 3000), // token ký, điền đủ lâu
     ...overrides,
   };
 }
@@ -58,7 +59,15 @@ describe("POST /api/lead", () => {
 
   it("rejects submissions that are too fast", async () => {
     const res = await POST(
-      buildReq(validPayload({ formLoadedAt: Date.now() })),
+      buildReq(validPayload({ formToken: issueFormToken(Date.now()) })),
+    );
+    expect(res.status).toBe(400);
+    expect(pushLead).not.toHaveBeenCalled();
+  });
+
+  it("rejects a forged/missing form token (I1)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ formToken: "123.deadbeef" })),
     );
     expect(res.status).toBe(400);
     expect(pushLead).not.toHaveBeenCalled();

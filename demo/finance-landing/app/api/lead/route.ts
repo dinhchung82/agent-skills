@@ -5,9 +5,8 @@ import {
 } from "@/lib/validation";
 import { scoreLead, isInvestmentRange } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { verifyFormToken } from "@/lib/formToken";
 import { pushLead } from "@/lib/sheet";
-
-const MIN_FILL_MS = 2000; // điền nhanh hơn 2s → nghi bot
 
 // Giới hạn độ dài trường để chống lạm dụng / payload phình to.
 const MAX = { name: 100, email: 254, phone: 20 } as const;
@@ -37,7 +36,7 @@ export async function POST(req: Request) {
     investmentRange,
     consent,
     company_website: honeypot,
-    formLoadedAt,
+    formToken,
   } = body as Record<string, unknown>;
 
   // 1) Honeypot: người thật để trống.
@@ -45,10 +44,9 @@ export async function POST(req: Request) {
     return bad("bot_detected");
   }
 
-  // 2) Time-trap: điền quá nhanh → bot.
-  if (typeof formLoadedAt !== "number" || Date.now() - formLoadedAt < MIN_FILL_MS) {
-    return bad("too_fast");
-  }
+  // 2) Time-trap: token ký từ server (client không giả mạo được mốc thời gian).
+  const tokenResult = verifyFormToken(formToken);
+  if (tokenResult !== "ok") return bad(tokenResult);
 
   // 3) Rate limit theo IP.
   if (!checkRateLimit(clientIp(req))) {
