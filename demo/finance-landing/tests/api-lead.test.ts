@@ -27,6 +27,7 @@ function validPayload(overrides: Record<string, unknown> = {}) {
     email: "an@gmail.com",
     phone: "0912345678",
     investmentRange: "over_1b",
+    timeframe: "within_1m",
     consent: true,
     company_website: "", // honeypot để trống
     formToken: issueFormToken(Date.now() - 3000), // token ký, điền đủ lâu
@@ -105,6 +106,14 @@ describe("POST /api/lead", () => {
       buildReq(validPayload({ investmentRange: undefined })),
     );
     expect(res.status).toBe(400);
+  });
+
+  it("rejects an invalid/missing timeframe (S2)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ timeframe: "someday" })),
+    );
+    expect(res.status).toBe(400);
+    expect(pushLead).not.toHaveBeenCalled();
   });
 
   it("still confirms to the user if the sheet push fails (C2)", async () => {

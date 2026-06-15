@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreLead, tierForPoints } from "@/lib/scoring";
+import { scoreLead, tierForPoints, isTimeframe } from "@/lib/scoring";
 
 describe("tierForPoints (boundaries)", () => {
   it("39 -> cold, 40 -> warm", () => {
@@ -14,32 +14,43 @@ describe("tierForPoints (boundaries)", () => {
 });
 
 describe("scoreLead", () => {
-  it("high investment alone is hot", () => {
-    const r = scoreLead({ investmentRange: "over_1b", validPhone: false });
+  it("big amount + soon is hot", () => {
+    const r = scoreLead({ investmentRange: "over_1b", timeframe: "within_1m" });
+    expect(r.points).toBe(90);
     expect(r.tier).toBe("hot");
-    expect(r.points).toBeGreaterThanOrEqual(70);
   });
 
-  it("valid phone adds points and can lift warm to hot", () => {
-    const without = scoreLead({ investmentRange: "500m_1b", validPhone: false });
-    const withPhone = scoreLead({ investmentRange: "500m_1b", validPhone: true });
-    expect(withPhone.points).toBeGreaterThan(without.points);
-    expect(without.tier).toBe("warm");
-    expect(withPhone.tier).toBe("hot");
+  it("timeframe changes the tier (not a flat bonus)", () => {
+    const soon = scoreLead({ investmentRange: "500m_1b", timeframe: "within_1m" });
+    const later = scoreLead({ investmentRange: "500m_1b", timeframe: "over_6m" });
+    expect(soon.points).toBeGreaterThan(later.points);
+    expect(soon.tier).toBe("hot"); // 45 + 30 = 75
+    expect(later.tier).toBe("warm"); // 45 + 0 = 45
   });
 
-  it("low investment is cold", () => {
-    const r = scoreLead({ investmentRange: "under_100m", validPhone: false });
+  it("small amount + far out is cold", () => {
+    const r = scoreLead({ investmentRange: "under_100m", timeframe: "over_6m" });
+    expect(r.points).toBe(10);
     expect(r.tier).toBe("cold");
   });
 
-  it("unknown range scores 0 points (cold)", () => {
+  it("unknown values score 0 (cold)", () => {
     const r = scoreLead({
       // @ts-expect-error testing unknown value at runtime
       investmentRange: "bogus",
-      validPhone: false,
+      // @ts-expect-error testing unknown value at runtime
+      timeframe: "bogus",
     });
     expect(r.points).toBe(0);
     expect(r.tier).toBe("cold");
+  });
+});
+
+describe("isTimeframe", () => {
+  it("accepts known values, rejects others", () => {
+    expect(isTimeframe("within_1m")).toBe(true);
+    expect(isTimeframe("over_6m")).toBe(true);
+    expect(isTimeframe("someday")).toBe(false);
+    expect(isTimeframe(undefined)).toBe(false);
   });
 });

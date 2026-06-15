@@ -7,6 +7,7 @@ export interface LeadRecord extends LeadScore {
   email: string;
   phone: string;
   investmentRange: string;
+  timeframe: string;
   submittedAt: string;
 }
 

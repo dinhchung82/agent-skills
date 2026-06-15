@@ -6,6 +6,7 @@ const lead: LeadRecord = {
   email: "an@gmail.com",
   phone: "0912345678",
   investmentRange: "over_1b",
+  timeframe: "within_1m",
   submittedAt: "2026-06-15T00:00:00.000Z",
   points: 90,
   tier: "hot",

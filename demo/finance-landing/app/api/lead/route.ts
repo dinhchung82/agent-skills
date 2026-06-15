@@ -3,7 +3,7 @@ import {
   isDisposableEmail,
   isValidVNPhone,
 } from "@/lib/validation";
-import { scoreLead, isInvestmentRange } from "@/lib/scoring";
+import { scoreLead, isInvestmentRange, isTimeframe } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { verifyFormToken } from "@/lib/formToken";
 import { pushLead } from "@/lib/sheet";
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     email,
     phone,
     investmentRange,
+    timeframe,
     consent,
     company_website: honeypot,
     formToken,
@@ -66,9 +67,10 @@ export async function POST(req: Request) {
   if (typeof phone !== "string" || phone.length > MAX.phone || !isValidVNPhone(phone))
     return bad("invalid_phone");
   if (!isInvestmentRange(investmentRange)) return bad("invalid_investment_range");
+  if (!isTimeframe(timeframe)) return bad("invalid_timeframe");
 
   // 5) Chấm điểm.
-  const score = scoreLead({ investmentRange, validPhone: true });
+  const score = scoreLead({ investmentRange, timeframe });
 
   // 6) Đẩy mọi lead hợp lệ kèm điểm sang Sheet. Không để lead thất lạc nếu
   //    Sheet tạm lỗi: log (không kèm PII) và vẫn xác nhận cho người dùng.
@@ -78,6 +80,7 @@ export async function POST(req: Request) {
       email: email.trim(),
       phone: phone.replace(/\s+/g, ""),
       investmentRange,
+      timeframe,
       submittedAt: new Date().toISOString(),
       ...score,
     });
