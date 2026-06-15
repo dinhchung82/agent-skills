@@ -1,0 +1,28 @@
+{
+  "hero": {
+    "title": "Tư vấn đầu tư tài chính chuyên nghiệp",
+    "subtitle": "Để lại thông tin, chuyên gia của chúng tôi sẽ liên hệ tư vấn miễn phí giải pháp phù hợp với mục tiêu của bạn.",
+    "disclaimer": "Đầu tư có rủi ro. Hiệu suất trong quá khứ không đảm bảo kết quả tương lai. Thông tin trên trang chỉ mang tính tham khảo, không phải lời khuyên đầu tư."
+  },
+  "lang": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "form": {
+    "name": "Họ tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "investmentRange": "Mức đầu tư dự kiến",
+    "options": {
+      "under_100m": "Dưới 100 triệu",
+      "100m_500m": "100 – 500 triệu",
+      "500m_1b": "500 triệu – 1 tỷ",
+      "over_1b": "Trên 1 tỷ"
+    },
+    "consent": "Tôi đồng ý được liên hệ và xử lý thông tin của tôi",
+    "submit": "Đăng ký tư vấn",
+    "submitting": "Đang gửi...",
+    "successMessage": "Cảm ơn bạn! Chúng tôi sẽ liên hệ trong thời gian sớm nhất.",
+    "errorMessage": "Gửi không thành công. Vui lòng kiểm tra lại thông tin."
+  }
+}

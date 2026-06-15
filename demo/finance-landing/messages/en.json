@@ -1,0 +1,28 @@
+{
+  "hero": {
+    "title": "Professional Financial Investment Advisory",
+    "subtitle": "Leave your details and our experts will reach out with a free consultation tailored to your goals.",
+    "disclaimer": "Investing involves risk. Past performance does not guarantee future results. Information on this page is for reference only and is not investment advice."
+  },
+  "lang": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "form": {
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone number",
+    "investmentRange": "Expected investment",
+    "options": {
+      "under_100m": "Under 100M VND",
+      "100m_500m": "100 – 500M VND",
+      "500m_1b": "500M – 1B VND",
+      "over_1b": "Over 1B VND"
+    },
+    "consent": "I agree to be contacted and to the processing of my information",
+    "submit": "Request consultation",
+    "submitting": "Submitting...",
+    "successMessage": "Thank you! We will contact you shortly.",
+    "errorMessage": "Submission failed. Please check your details."
+  }
+}
