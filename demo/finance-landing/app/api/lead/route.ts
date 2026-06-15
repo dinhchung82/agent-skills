@@ -40,8 +40,8 @@ export async function POST(req: Request) {
     formToken,
   } = body as Record<string, unknown>;
 
-  // 1) Honeypot: người thật để trống.
-  if (typeof honeypot === "string" && honeypot.trim() !== "") {
+  // 1) Honeypot: người thật để trống (bắt cả giá trị non-string do bot gửi).
+  if (honeypot != null && String(honeypot).trim() !== "") {
     return bad("bot_detected");
   }
 

@@ -58,6 +58,14 @@ describe("POST /api/lead", () => {
     expect(pushLead).not.toHaveBeenCalled();
   });
 
+  it("rejects a non-string honeypot value (B5 bypass)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ company_website: ["x"] })),
+    );
+    expect(res.status).toBe(400);
+    expect(pushLead).not.toHaveBeenCalled();
+  });
+
   it("rejects submissions that are too fast", async () => {
     const res = await POST(
       buildReq(validPayload({ formToken: issueFormToken(Date.now()) })),
