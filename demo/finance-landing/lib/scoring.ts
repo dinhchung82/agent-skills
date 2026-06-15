@@ -27,6 +27,19 @@ const INVESTMENT_POINTS: Record<InvestmentRange, number> = {
 
 const PHONE_BONUS = 15;
 
+/** Danh sách hợp lệ — nguồn sự thật duy nhất cho mức đầu tư. */
+export const INVESTMENT_RANGES = Object.keys(
+  INVESTMENT_POINTS,
+) as InvestmentRange[];
+
+/** Type guard: kiểm tra giá trị client gửi có phải mức đầu tư hợp lệ không. */
+export function isInvestmentRange(value: unknown): value is InvestmentRange {
+  return (
+    typeof value === "string" &&
+    (INVESTMENT_RANGES as string[]).includes(value)
+  );
+}
+
 export function tierForPoints(points: number): LeadTier {
   if (points >= 70) return "hot";
   if (points >= 40) return "warm";

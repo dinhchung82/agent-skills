@@ -3,7 +3,7 @@ import {
   isDisposableEmail,
   isValidVNPhone,
 } from "@/lib/validation";
-import { scoreLead, type InvestmentRange } from "@/lib/scoring";
+import { scoreLead, isInvestmentRange } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { pushLead } from "@/lib/sheet";
 
@@ -61,22 +61,25 @@ export async function POST(req: Request) {
   if (typeof email !== "string" || !isValidEmail(email)) return bad("invalid_email");
   if (isDisposableEmail(email)) return bad("disposable_email");
   if (typeof phone !== "string" || !isValidVNPhone(phone)) return bad("invalid_phone");
+  if (!isInvestmentRange(investmentRange)) return bad("invalid_investment_range");
 
   // 5) Chấm điểm.
-  const score = scoreLead({
-    investmentRange: investmentRange as InvestmentRange,
-    validPhone: true,
-  });
+  const score = scoreLead({ investmentRange, validPhone: true });
 
-  // 6) Đẩy mọi lead hợp lệ kèm điểm sang Sheet.
-  await pushLead({
-    name: name.trim(),
-    email: email.trim(),
-    phone: phone.replace(/\s+/g, ""),
-    investmentRange: String(investmentRange),
-    submittedAt: new Date().toISOString(),
-    ...score,
-  });
+  // 6) Đẩy mọi lead hợp lệ kèm điểm sang Sheet. Không để lead thất lạc nếu
+  //    Sheet tạm lỗi: log (không kèm PII) và vẫn xác nhận cho người dùng.
+  try {
+    await pushLead({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.replace(/\s+/g, ""),
+      investmentRange,
+      submittedAt: new Date().toISOString(),
+      ...score,
+    });
+  } catch (err) {
+    console.error("lead sheet push failed:", (err as Error).message);
+  }
 
   return Response.json({ ok: true, ...score }, { status: 200 });
 }

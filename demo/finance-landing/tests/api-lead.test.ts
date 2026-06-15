@@ -83,6 +83,30 @@ describe("POST /api/lead", () => {
     expect(pushLead).not.toHaveBeenCalled();
   });
 
+  it("rejects an invalid/unknown investmentRange (C1)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ investmentRange: "bogus" })),
+    );
+    expect(res.status).toBe(400);
+    expect(pushLead).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing investmentRange (C1)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ investmentRange: undefined })),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("still confirms to the user if the sheet push fails (C2)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(pushLead).mockRejectedValueOnce(new Error("sheet down"));
+    const res = await POST(buildReq(validPayload()));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+  });
+
   it("rate-limits after 5 submissions from same IP", async () => {
     const ip = "9.9.9.9";
     for (let i = 0; i < 5; i++) {

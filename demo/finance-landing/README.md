@@ -64,6 +64,23 @@ Google Apps Script:
 > ở `/api/lead` trước khi tới đây. Với prod, cân nhắc thêm token bí mật chia sẻ giữa
 > app và Apps Script, và chuyển rate-limit sang Redis.
 
+## Giới hạn đã biết (cần xử lý trước khi lên production)
+
+Các lớp chặn bot hiện tại đủ cho demo và chặn bot ngây thơ, nhưng **chưa đủ mạnh
+cho prod** vì phụ thuộc dữ liệu do client kiểm soát:
+
+- **Time-trap dựa vào `formLoadedAt` từ client** — bot có thể gửi mốc thời gian giả
+  để vượt. Prod nên phát token thời gian ký HMAC từ server khi render form.
+- **Rate limit theo `x-forwarded-for` + lưu in-memory** — header này giả mạo được, và
+  `Map` ở module scope **không hiệu lực trên serverless** (mỗi invocation có thể là
+  instance mới) đồng thời phình bộ nhớ theo thời gian. Prod nên dùng Redis/Upstash và
+  key theo IP từ header tin cậy của hạ tầng (vd `request.ip` trên Vercel).
+- **Chưa giới hạn độ dài trường / kích thước payload** — nên cap (vd `name` ≤ 100,
+  `email` ≤ 254) và giới hạn body size để chống lạm dụng.
+
+Đã xử lý: validate `investmentRange` ở server (whitelist) và không để lead thất lạc
+khi Google Sheet tạm lỗi (log + vẫn xác nhận cho người dùng).
+
 ## Cấu trúc
 
 ```
