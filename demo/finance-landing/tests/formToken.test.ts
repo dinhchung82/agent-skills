@@ -35,4 +35,20 @@ describe("formToken", () => {
     expect(verifyFormToken("nope", T0)).toBe("malformed");
     expect(verifyFormToken(undefined, T0)).toBe("malformed");
   });
+
+  it("fails closed in production without FORM_SECRET (B2)", () => {
+    const prevEnv = process.env.NODE_ENV;
+    const prevSecret = process.env.FORM_SECRET;
+    try {
+      // @ts-expect-error overriding readonly for the test
+      process.env.NODE_ENV = "production";
+      delete process.env.FORM_SECRET;
+      expect(() => issueFormToken(T0)).toThrow(/FORM_SECRET/);
+    } finally {
+      // @ts-expect-error restoring
+      process.env.NODE_ENV = prevEnv;
+      if (prevSecret === undefined) delete process.env.FORM_SECRET;
+      else process.env.FORM_SECRET = prevSecret;
+    }
+  });
 });

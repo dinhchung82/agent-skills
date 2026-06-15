@@ -15,8 +15,18 @@ export type TokenResult =
   | "expired";
 
 function secret(): string {
-  // Dev fallback để chạy ngay; prod BẮT BUỘC đặt FORM_SECRET.
-  return process.env.FORM_SECRET ?? "dev-insecure-form-secret";
+  const s = process.env.FORM_SECRET;
+  if (process.env.NODE_ENV === "production") {
+    // Fail-closed: không cho prod chạy với secret công khai.
+    if (!s || s.length < 32) {
+      throw new Error(
+        "FORM_SECRET must be set to at least 32 characters in production",
+      );
+    }
+    return s;
+  }
+  // Dev/test fallback để chạy ngay (KHÔNG an toàn cho production).
+  return s ?? "dev-insecure-form-secret";
 }
 
 function sign(ts: number): string {
