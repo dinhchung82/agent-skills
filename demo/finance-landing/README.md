@@ -11,7 +11,7 @@ Spec: [`SPEC.md`](./SPEC.md) · Kế hoạch: [`tasks/plan.md`](./tasks/plan.md)
 npm install
 cp .env.example .env.local      # rồi điền SHEET_WEBHOOK_URL
 npm run dev                     # http://localhost:3000 → redirect /vi
-npm test                        # 35 test (mock Google Sheet, không gọi mạng)
+npm test                        # 59 test (mock Google Sheet, không gọi mạng)
 npm run build
 ```
 
@@ -73,8 +73,16 @@ Google Apps Script:
 - **Không mất lead khi Sheet lỗi** — `pushLead` bọc try/catch, log (không kèm PII)
   và vẫn xác nhận cho người dùng.
 - **Cap độ dài trường** — `name` ≤ 100, `email` ≤ 254, `phone` ≤ 20.
-- **Time-trap ký HMAC từ server** (`lib/formToken.ts`) — token phát khi render trang,
-  client **không giả mạo được** mốc thời gian; token hết hạn sau 30 phút.
+- **Time-trap ký HMAC + nonce single-use** (`lib/formToken.ts`) — token phát khi render
+  trang, client **không giả mạo được** mốc thời gian; hết hạn sau 30 phút; mỗi token
+  chỉ dùng được **một lần** (chống replay). Lỗi validate không đốt token.
+- **Fail-closed `FORM_SECRET`** — prod ném lỗi nếu thiếu/secret < 32 ký tự (không chạy
+  với secret dev công khai).
+- **Chống CSV/formula injection** (`lib/sheet.ts`) — trường free-text bắt đầu bằng
+  `= + - @` được thêm dấu nháy trước khi ghi vào Sheet; webhook có timeout 5s.
+- **Security headers** (`next.config.mjs`) — CSP, HSTS, X-Frame-Options, nosniff,
+  Referrer-Policy.
+- **Honeypot bắt cả giá trị non-string** do bot gửi.
 - **Rate limit qua store cắm được** (`lib/rateLimit.ts`) — store in-memory mặc định có
   dọn rác chống phình bộ nhớ; prod chỉ cần `setRateLimitStore(redisStore)`.
 
@@ -85,6 +93,12 @@ Còn lại (phụ thuộc hạ tầng, làm khi deploy):
   store in-memory không chia sẻ trạng thái giữa các invocation/instance.
 - **Key IP từ header tin cậy** — `x-forwarded-for` giả mạo được; trên Vercel nên dùng
   `request.ip` / header tin cậy của hạ tầng thay vì lấy trực tiếp từ request.
+- **Nonce store dùng chung trên serverless** — single-use token cần `setNonceStore`
+  trỏ Redis/Upstash để có hiệu lực toàn cục giữa các instance.
+- **Nâng dependencies (migration)** — `npm audit` còn cảnh báo cần nâng major
+  `next` (14→16) và `next-intl` (3→4); là migration framework, làm theo lịch riêng
+  rồi `npm audit --audit-level=high` trong CI. (Critical "vitest" chỉ ảnh hưởng
+  `vitest --ui`, không dùng ở đây.)
 
 ## Cấu trúc
 
