@@ -1,7 +1,14 @@
-import { describe, it, expect } from "vitest";
-import { issueFormToken, verifyFormToken } from "@/lib/formToken";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  issueFormToken,
+  verifyFormToken,
+  consumeFormToken,
+  resetNonceStore,
+} from "@/lib/formToken";
 
 const T0 = 1_700_000_000_000;
+
+beforeEach(() => resetNonceStore());
 
 describe("formToken", () => {
   it("issues a token that verifies after enough time", () => {
@@ -21,14 +28,24 @@ describe("formToken", () => {
 
   it("rejects a tampered timestamp (client cannot forge time)", () => {
     const token = issueFormToken(T0);
-    const forged = `${T0 - 5000}.${token.split(".")[1]}`;
+    const [, nonce, sig] = token.split(".");
+    const forged = `${T0 - 5000}.${nonce}.${sig}`;
     expect(verifyFormToken(forged, T0 + 3000)).toBe("bad_signature");
   });
 
   it("rejects a tampered signature", () => {
     const token = issueFormToken(T0);
-    const [ts] = token.split(".");
-    expect(verifyFormToken(`${ts}.deadbeef`, T0 + 3000)).toBe("bad_signature");
+    const [ts, nonce] = token.split(".");
+    expect(verifyFormToken(`${ts}.${nonce}.deadbeef`, T0 + 3000)).toBe(
+      "bad_signature",
+    );
+  });
+
+  it("rejects a replayed token after it is consumed (B1)", () => {
+    const token = issueFormToken(T0);
+    expect(verifyFormToken(token, T0 + 3000)).toBe("ok");
+    consumeFormToken(token, T0 + 3000);
+    expect(verifyFormToken(token, T0 + 4000)).toBe("replayed");
   });
 
   it("rejects malformed input", () => {

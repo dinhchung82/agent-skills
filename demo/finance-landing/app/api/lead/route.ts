@@ -5,7 +5,7 @@ import {
 } from "@/lib/validation";
 import { scoreLead, isInvestmentRange, isTimeframe } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
-import { verifyFormToken } from "@/lib/formToken";
+import { verifyFormToken, consumeFormToken } from "@/lib/formToken";
 import { pushLead } from "@/lib/sheet";
 
 // Giới hạn độ dài trường để chống lạm dụng / payload phình to.
@@ -68,6 +68,10 @@ export async function POST(req: Request) {
     return bad("invalid_phone");
   if (!isInvestmentRange(investmentRange)) return bad("invalid_investment_range");
   if (!isTimeframe(timeframe)) return bad("invalid_timeframe");
+
+  // Token hợp lệ + dữ liệu hợp lệ → tiêu thụ nonce (single-use). Lỗi validate
+  // phía trên KHÔNG đốt token để người dùng sửa và gửi lại được.
+  consumeFormToken(formToken);
 
   // 5) Chấm điểm.
   const score = scoreLead({ investmentRange, timeframe });

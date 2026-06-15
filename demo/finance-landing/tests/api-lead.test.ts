@@ -8,7 +8,7 @@ vi.mock("@/lib/sheet", () => ({
 import { POST } from "@/app/api/lead/route";
 import { pushLead } from "@/lib/sheet";
 import { resetRateLimit } from "@/lib/rateLimit";
-import { issueFormToken } from "@/lib/formToken";
+import { issueFormToken, resetNonceStore } from "@/lib/formToken";
 
 function buildReq(payload: Record<string, unknown>, ip = "1.2.3.4") {
   return new Request("http://localhost/api/lead", {
@@ -37,6 +37,7 @@ function validPayload(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   resetRateLimit();
+  resetNonceStore();
   vi.mocked(pushLead).mockClear();
 });
 
@@ -147,6 +148,17 @@ describe("POST /api/lead", () => {
       buildReq(validPayload({ email: `${longLocal}@example.com` })),
     );
     expect(res.status).toBe(400);
+  });
+
+  it("rejects a replayed token on a second submission (B1)", async () => {
+    const token = issueFormToken(Date.now() - 3000);
+    const first = await POST(buildReq(validPayload({ formToken: token })));
+    expect(first.status).toBe(200);
+    const second = await POST(buildReq(validPayload({ formToken: token })));
+    expect(second.status).toBe(400);
+    const body = await second.json();
+    expect(body.error).toBe("replayed");
+    expect(pushLead).toHaveBeenCalledTimes(1);
   });
 
   it("rate-limits after 5 submissions from same IP", async () => {
