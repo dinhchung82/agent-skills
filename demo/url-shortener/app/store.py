@@ -14,7 +14,7 @@ class Store:
     """Lưu mapping code → url trên SQLite, kèm bộ đếm click."""
 
     def __init__(self, path: str = "urls.db") -> None:
-        self._conn = sqlite3.connect(path)
+        self._conn = sqlite3.connect(path, check_same_thread=False)
         self._conn.execute(
             "CREATE TABLE IF NOT EXISTS urls ("
             "  code TEXT PRIMARY KEY,"
