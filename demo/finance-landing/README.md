@@ -64,22 +64,27 @@ Google Apps Script:
 > ở `/api/lead` trước khi tới đây. Với prod, cân nhắc thêm token bí mật chia sẻ giữa
 > app và Apps Script, và chuyển rate-limit sang Redis.
 
-## Giới hạn đã biết (cần xử lý trước khi lên production)
+## Bảo mật & giới hạn
 
-Các lớp chặn bot hiện tại đủ cho demo và chặn bot ngây thơ, nhưng **chưa đủ mạnh
-cho prod** vì phụ thuộc dữ liệu do client kiểm soát:
+Đã xử lý (có test):
 
-- **Time-trap dựa vào `formLoadedAt` từ client** — bot có thể gửi mốc thời gian giả
-  để vượt. Prod nên phát token thời gian ký HMAC từ server khi render form.
-- **Rate limit theo `x-forwarded-for` + lưu in-memory** — header này giả mạo được, và
-  `Map` ở module scope **không hiệu lực trên serverless** (mỗi invocation có thể là
-  instance mới) đồng thời phình bộ nhớ theo thời gian. Prod nên dùng Redis/Upstash và
-  key theo IP từ header tin cậy của hạ tầng (vd `request.ip` trên Vercel).
-- **Chưa giới hạn độ dài trường / kích thước payload** — nên cap (vd `name` ≤ 100,
-  `email` ≤ 254) và giới hạn body size để chống lạm dụng.
+- **Validate đầy đủ ở server** — name/email/phone/consent **và** `investmentRange`
+  (whitelist); không tin client.
+- **Không mất lead khi Sheet lỗi** — `pushLead` bọc try/catch, log (không kèm PII)
+  và vẫn xác nhận cho người dùng.
+- **Cap độ dài trường** — `name` ≤ 100, `email` ≤ 254, `phone` ≤ 20.
+- **Time-trap ký HMAC từ server** (`lib/formToken.ts`) — token phát khi render trang,
+  client **không giả mạo được** mốc thời gian; token hết hạn sau 30 phút.
+- **Rate limit qua store cắm được** (`lib/rateLimit.ts`) — store in-memory mặc định có
+  dọn rác chống phình bộ nhớ; prod chỉ cần `setRateLimitStore(redisStore)`.
 
-Đã xử lý: validate `investmentRange` ở server (whitelist) và không để lead thất lạc
-khi Google Sheet tạm lỗi (log + vẫn xác nhận cho người dùng).
+Còn lại (phụ thuộc hạ tầng, làm khi deploy):
+
+- **Đặt `FORM_SECRET`** là chuỗi ngẫu nhiên mạnh ở prod (mặc định dev không an toàn).
+- **Rate limit dùng chung trên serverless** — cắm Redis/Upstash qua `setRateLimitStore`;
+  store in-memory không chia sẻ trạng thái giữa các invocation/instance.
+- **Key IP từ header tin cậy** — `x-forwarded-for` giả mạo được; trên Vercel nên dùng
+  `request.ip` / header tin cậy của hạ tầng thay vì lấy trực tiếp từ request.
 
 ## Cấu trúc
 
