@@ -107,6 +107,22 @@ describe("POST /api/lead", () => {
     expect(body.ok).toBe(true);
   });
 
+  it("rejects an over-long name (I3)", async () => {
+    const res = await POST(
+      buildReq(validPayload({ name: "a".repeat(101) })),
+    );
+    expect(res.status).toBe(400);
+    expect(pushLead).not.toHaveBeenCalled();
+  });
+
+  it("rejects an over-long email (I3)", async () => {
+    const longLocal = "a".repeat(250);
+    const res = await POST(
+      buildReq(validPayload({ email: `${longLocal}@example.com` })),
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("rate-limits after 5 submissions from same IP", async () => {
     const ip = "9.9.9.9";
     for (let i = 0; i < 5; i++) {

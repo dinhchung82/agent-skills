@@ -9,6 +9,9 @@ import { pushLead } from "@/lib/sheet";
 
 const MIN_FILL_MS = 2000; // điền nhanh hơn 2s → nghi bot
 
+// Giới hạn độ dài trường để chống lạm dụng / payload phình to.
+const MAX = { name: 100, email: 254, phone: 20 } as const;
+
 function bad(reason: string) {
   return Response.json({ ok: false, error: reason }, { status: 400 });
 }
@@ -57,10 +60,13 @@ export async function POST(req: Request) {
 
   // 4) Validate dữ liệu (server-side, không tin client).
   if (consent !== true) return bad("consent_required");
-  if (typeof name !== "string" || name.trim().length < 2) return bad("invalid_name");
-  if (typeof email !== "string" || !isValidEmail(email)) return bad("invalid_email");
+  if (typeof name !== "string" || name.trim().length < 2 || name.length > MAX.name)
+    return bad("invalid_name");
+  if (typeof email !== "string" || email.length > MAX.email || !isValidEmail(email))
+    return bad("invalid_email");
   if (isDisposableEmail(email)) return bad("disposable_email");
-  if (typeof phone !== "string" || !isValidVNPhone(phone)) return bad("invalid_phone");
+  if (typeof phone !== "string" || phone.length > MAX.phone || !isValidVNPhone(phone))
+    return bad("invalid_phone");
   if (!isInvestmentRange(investmentRange)) return bad("invalid_investment_range");
 
   // 5) Chấm điểm.
