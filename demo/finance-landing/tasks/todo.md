@@ -11,7 +11,7 @@ Thứ tự đề xuất. Mỗi mục = 1 commit, chạy test trước khi commit
 - [x] **T5** LeadForm component (5 trường + honeypot + consent + time-trap) — RTL test
 - [x] **T6** Landing page + i18n VI/EN + disclaimer — `/vi` & `/en` render đúng
 - [x] 🚩 **CP-C** — trang chạy đầy đủ (dừng tại đây theo yêu cầu)
-- [ ] **T7** (tùy chọn) Google Sheet thật qua Apps Script webhook + env + README
+- [x] **T7** Google Sheet thật qua Apps Script webhook + env + README + test pushLead
 
 ## Mở (không chặn)
 - [ ] Chốt các mốc "mức đầu tư" cho dropdown (ảnh hưởng bảng điểm scoring)
