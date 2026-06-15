@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { LeadForm, type LeadFormLabels } from "@/components/LeadForm";
 import { issueFormToken } from "@/lib/formToken";
 
+// Bắt buộc render động: mỗi lần tải trang mint một form token mới (không cache).
+export const dynamic = "force-dynamic";
+
 const INVESTMENT_VALUES = [
   "under_100m",
   "100m_500m",
