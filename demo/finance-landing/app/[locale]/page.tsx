@@ -37,6 +37,7 @@ export default async function Home({
       label: t(`form.timeframeOptions.${value}`),
     })),
     consent: t("form.consent"),
+    consentHint: t("form.consentHint"),
     submit: t("form.submit"),
     submitting: t("form.submitting"),
     successMessage: t("form.successMessage"),

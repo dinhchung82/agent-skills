@@ -27,6 +27,7 @@
       "over_6m": "Trên 6 tháng"
     },
     "consent": "Tôi đồng ý được liên hệ và xử lý thông tin của tôi",
+    "consentHint": "Vui lòng tích ô đồng ý để gửi đăng ký.",
     "submit": "Đăng ký tư vấn",
     "submitting": "Đang gửi...",
     "successMessage": "Cảm ơn bạn! Chúng tôi sẽ liên hệ trong thời gian sớm nhất.",

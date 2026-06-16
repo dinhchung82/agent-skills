@@ -11,6 +11,7 @@ export interface LeadFormLabels {
   timeframe: string;
   timeframeOptions: { value: string; label: string }[];
   consent: string;
+  consentHint: string;
   submit: string;
   submitting: string;
   successMessage: string;
@@ -36,6 +37,7 @@ export const defaultLabels: LeadFormLabels = {
     { value: "over_6m", label: "Trên 6 tháng" },
   ],
   consent: "Tôi đồng ý được liên hệ và xử lý thông tin của tôi",
+  consentHint: "Vui lòng tích ô đồng ý để gửi đăng ký.",
   submit: "Đăng ký tư vấn",
   submitting: "Đang gửi...",
   successMessage: "Cảm ơn bạn! Chúng tôi sẽ liên hệ trong thời gian sớm nhất.",
@@ -151,10 +153,13 @@ export function LeadForm({
       <button
         type="submit"
         disabled={!consent || status === "submitting"}
-        className="bg-blue-600 text-white p-2 rounded disabled:opacity-50"
+        className="rounded p-2 font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
       >
         {status === "submitting" ? labels.submitting : labels.submit}
       </button>
+      {!consent && (
+        <p className="text-sm text-gray-500">{labels.consentHint}</p>
+      )}
 
       {status === "success" && (
         <p role="status" className="text-green-600">
