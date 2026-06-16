@@ -27,6 +27,7 @@
       "over_6m": "Over 6 months"
     },
     "consent": "I agree to be contacted and to the processing of my information",
+    "consentHint": "Please check the consent box to submit.",
     "submit": "Request consultation",
     "submitting": "Submitting...",
     "successMessage": "Thank you! We will contact you shortly.",
