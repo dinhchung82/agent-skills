@@ -3,12 +3,17 @@ import { getTranslations } from "next-intl/server";
 import { LeadForm, type LeadFormLabels } from "@/components/LeadForm";
 import { issueFormToken } from "@/lib/formToken";
 
-const OPTION_VALUES = [
+// Bắt buộc render động: mỗi lần tải trang mint một form token mới (không cache).
+export const dynamic = "force-dynamic";
+
+const INVESTMENT_VALUES = [
   "under_100m",
   "100m_500m",
   "500m_1b",
   "over_1b",
 ] as const;
+
+const TIMEFRAME_VALUES = ["within_1m", "1_3m", "3_6m", "over_6m"] as const;
 
 export default async function Home({
   params: { locale },
@@ -22,9 +27,14 @@ export default async function Home({
     email: t("form.email"),
     phone: t("form.phone"),
     investmentRange: t("form.investmentRange"),
-    investmentOptions: OPTION_VALUES.map((value) => ({
+    investmentOptions: INVESTMENT_VALUES.map((value) => ({
       value,
       label: t(`form.options.${value}`),
+    })),
+    timeframe: t("form.timeframe"),
+    timeframeOptions: TIMEFRAME_VALUES.map((value) => ({
+      value,
+      label: t(`form.timeframeOptions.${value}`),
     })),
     consent: t("form.consent"),
     submit: t("form.submit"),

@@ -7,7 +7,16 @@ export interface LeadRecord extends LeadScore {
   email: string;
   phone: string;
   investmentRange: string;
+  timeframe: string;
   submittedAt: string;
+}
+
+/**
+ * Vô hiệu hoá CSV/formula injection: nếu giá trị bắt đầu bằng ký tự kích hoạt
+ * công thức (= + - @ tab CR LF), thêm dấu nháy đơn ở đầu để Sheets coi là text.
+ */
+export function sanitizeCell(value: string): string {
+  return /^[=+\-@\t\r\n]/.test(value) ? `'${value}` : value;
 }
 
 /**
@@ -19,10 +28,18 @@ export async function pushLead(lead: LeadRecord): Promise<void> {
   if (!url) {
     throw new Error("SHEET_WEBHOOK_URL is not configured");
   }
+  // Làm sạch trường free-text trước khi ghi vào bảng tính.
+  const safe: LeadRecord = {
+    ...lead,
+    name: sanitizeCell(lead.name),
+    email: sanitizeCell(lead.email),
+    phone: sanitizeCell(lead.phone),
+  };
   const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(lead),
+    body: JSON.stringify(safe),
+    signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) {
     throw new Error(`Sheet webhook failed with status ${res.status}`);

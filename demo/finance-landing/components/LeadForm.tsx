@@ -8,6 +8,8 @@ export interface LeadFormLabels {
   phone: string;
   investmentRange: string;
   investmentOptions: { value: string; label: string }[];
+  timeframe: string;
+  timeframeOptions: { value: string; label: string }[];
   consent: string;
   submit: string;
   submitting: string;
@@ -25,6 +27,13 @@ export const defaultLabels: LeadFormLabels = {
     { value: "100m_500m", label: "100 – 500 triệu" },
     { value: "500m_1b", label: "500 triệu – 1 tỷ" },
     { value: "over_1b", label: "Trên 1 tỷ" },
+  ],
+  timeframe: "Dự kiến đầu tư trong",
+  timeframeOptions: [
+    { value: "within_1m", label: "Trong 1 tháng" },
+    { value: "1_3m", label: "1 – 3 tháng" },
+    { value: "3_6m", label: "3 – 6 tháng" },
+    { value: "over_6m", label: "Trên 6 tháng" },
   ],
   consent: "Tôi đồng ý được liên hệ và xử lý thông tin của tôi",
   submit: "Đăng ký tư vấn",
@@ -56,6 +65,7 @@ export function LeadForm({
       email: String(data.get("email") ?? ""),
       phone: String(data.get("phone") ?? ""),
       investmentRange: String(data.get("investmentRange") ?? ""),
+      timeframe: String(data.get("timeframe") ?? ""),
       consent,
       company_website: String(data.get("company_website") ?? ""),
       formToken,
@@ -97,6 +107,20 @@ export function LeadForm({
             —
           </option>
           {labels.investmentOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="timeframe">{labels.timeframe}</label>
+        <select id="timeframe" name="timeframe" required className="border p-2 rounded" defaultValue="">
+          <option value="" disabled>
+            —
+          </option>
+          {labels.timeframeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>

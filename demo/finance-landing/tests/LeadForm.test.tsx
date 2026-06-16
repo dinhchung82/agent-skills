@@ -16,6 +16,7 @@ describe("LeadForm", () => {
     expect(
       screen.getByLabelText(defaultLabels.investmentRange),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText(defaultLabels.timeframe)).toBeInTheDocument();
     expect(screen.getByLabelText(defaultLabels.consent)).toBeInTheDocument();
   });
 
@@ -57,6 +58,10 @@ describe("LeadForm", () => {
       screen.getByLabelText(defaultLabels.investmentRange),
       "over_1b",
     );
+    await user.selectOptions(
+      screen.getByLabelText(defaultLabels.timeframe),
+      "within_1m",
+    );
     await user.click(screen.getByLabelText(defaultLabels.consent));
     await user.click(
       screen.getByRole("button", { name: defaultLabels.submit }),
@@ -71,6 +76,7 @@ describe("LeadForm", () => {
       email: "an@gmail.com",
       phone: "0912345678",
       investmentRange: "over_1b",
+      timeframe: "within_1m",
       consent: true,
       company_website: "",
       formToken: "signed-token",

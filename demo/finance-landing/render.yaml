@@ -1,0 +1,24 @@
+# Render Blueprint cho finance-landing.
+#
+# Cách dùng:
+#  - Nếu app này là repo riêng (render.yaml ở gốc repo): để nguyên, bỏ "rootDir".
+#  - Nếu deploy từ repo chứa app trong thư mục con (như hiện tại), dễ nhất là
+#    deploy bằng Dashboard và set Root Directory = demo/finance-landing
+#    (xem DEPLOY.md). Render Blueprint chỉ tự nhận render.yaml ở GỐC repo.
+services:
+  - type: web
+    name: finance-landing
+    runtime: node
+    plan: free # đổi sang "starter" để instance luôn bật (không ngủ)
+    rootDir: demo/finance-landing
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /vi
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FORM_SECRET
+        generateValue: true # Render sinh chuỗi ngẫu nhiên an toàn (>=32 ký tự)
+      - key: SHEET_WEBHOOK_URL
+        sync: false # đặt thủ công trong Dashboard (không commit URL)
